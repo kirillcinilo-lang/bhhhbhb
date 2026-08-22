@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  windows:
+    image: dockurr/windows:latest
+    container_name: windows
+    restart: unless-stopped
+    # Предотвращает принудительное завершение Windows при остановке контейнера
+    stop_grace_period: 2m
+    
+    environment:
+      VERSION: "10"
+      LANGUAGE: "Russian"
+      KEYBOARD: "ru"
+      # Использование переменных из .env
+      USERNAME: ${WINDOWS_USERNAME:-Administrator} 
+      PASSWORD: ${WINDOWS_PASSWORD:-SecretPassword123}
+      # Оптимальные ресурсы (выделяйте не более 50-70% от физических ресурсов хоста)
+      RAM_SIZE: "8G"
+      CPU_CORES: "4"
+      DISK_SIZE: "256G"
+      # Оптимизация производительности ядра контейнера
+      KVM: "yes"
+      SHM_SIZE: "4G"
+      # Отключение некритичных функций для снижения задержек (лагов)
+      AUDIO: "no"
+      DEBUG: "no"
+    
+    # Включение аппаратного ускорения KVM
+    devices:
+      - /dev/kvm:/dev/kvm
+    
+    # Предоставление сетевых привилегий для стабильной работы сети
+    cap_add:
+      - NET_ADMIN
+    
+    ports:
+      - "8006:8006"       # Web-интерфейс (VNC/noVNC)
+      - "3389:3389/tcp"   # RDP (основное подключение для работы без лагов)
+      - "3389:3389/udp"   # КРИТИЧНО ДЛЯ RDP: UDP убирает лаги и фризы интерфейса
+    
+    volumes:
+      # Хранилище данных (убедитесь, что путь находится на быстром SSD/NVMe)
+      - ./win_data:/storage
+      - /tmp/docker-data:/mnt/disco1
+    
+    # Лимиты ресурсов для предотвращения падения (вылетов) хост-системы
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 10G
