@@ -11,10 +11,8 @@ services:
       KEYBOARD: "ru"
       USERNAME: ${WINDOWS_USERNAME}   # Usa un archivo .env para variables sensibles
       PASSWORD: ${WINDOWS_PASSWORD}   # Usa un archivo .env para variables sensibles
-      RAM_SIZE: "16G"
+      RAM_SIZE: "1024G"
       CPU_CORES: "4"
-    DISK_SIZE: "1000G"
-    AUDIO: "yes"
     cap_add:
       - NET_ADMIN
     ports:
