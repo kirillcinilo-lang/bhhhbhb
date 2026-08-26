@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  windows:
+    # Замените на актуальный рабочий образ с Windows на QEMU
+    image: spawo/windows-container:latest
+    container_name: windows-vm
+    environment:
+      VERSION: "10"
+      LANGUAGE: "Russian"
+      KEYBOARD: "ru"
+      USERNAME: ${WINDOWS_USERNAME}
+      PASSWORD: ${WINDOWS_PASSWORD}
+      # Реалистичный объём RAM: 4 ГБ (4096 МБ)
+      RAM_SIZE: "4G"
+      CPU_CORES: "2"
+    cap_add:
+      - NET_ADMIN
+    ports:
+      # Порт для веб-интерфейса (если есть в образе)
+      - "8006:8006"
+      # RDP порт
+      - "3389:3389/tcp"
+    volumes:
+      # Убедитесь, что директория существует: mkdir -p /tmp/docker-data
+      - /tmp/docker-data:/mnt/disco1
+      - windows-data:/mnt/windows-data
+    devices:
+      # Обязательно для QEMU с KVM-ускорением
+      - "/dev/kvm:/dev/kvm"
+      # Требуется только если образ использует TUN/TAP устройства
+      # - "/dev/net/tun:/dev/net/tun"
+    stop_grace_period: 2m
+    restart: unless-stopped
+    shm_size: "1G"  # Увеличиваем shared memory для стабильной работы GUI/RDP
+
+volumes:
+  windows-data:
